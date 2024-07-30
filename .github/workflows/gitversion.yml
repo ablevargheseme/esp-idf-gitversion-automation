@@ -29,7 +29,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Fetch all history for all tags and branches
-        run: git fetch --unshallow && git checkout --track origin/develop && git checkout --track origin/main
+        run: |
+          git fetch --unshallow
+          if git show-ref --verify --quiet refs/remotes/origin/develop; then
+            git checkout develop || git checkout --track origin/develop
+          fi
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            git checkout main || git checkout --track origin/main
+          fi
 
       - name: Checkout to branch
         run: |
@@ -40,7 +47,7 @@ jobs:
           fi
           git checkout ${DIFF_DEST}
 
-      - name: Calculate changed files
+      - name: Calculate changed  files
         id: calculate_changed_files
         run: |
           if [ "${GITHUB_EVENT_NAME}" = 'push' ]; then
@@ -94,9 +101,12 @@ jobs:
 
       - name: Tag build
         if: ${{ github.event_name == 'push' && (startsWith(steps.calculate_changed_files.outputs.diff_dest, 'release') || startsWith(steps.calculate_changed_files.outputs.diff_dest, 'hotfix') || contains(env.MAIN_BRANCHES, steps.calculate_changed_files.outputs.diff_dest)) }}
+        env:
+          ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions"
+          git remote set-url origin https://x-access-token:${ACTIONS_PAT}@github.com/${GITHUB_REPOSITORY}.git
           app_version=${{ steps.calculate_app_version.outputs.app_version }}
           previous_commit_count=$(git tag -l | grep "^app/v$(echo "${gitversion_calc}" | jq -r ".MajorMinorPatch")-$(echo "${gitversion_calc}" | jq -r ".PreReleaseLabel")" | grep -o -E '\.[0-9]+$' | grep -o -E '[0-9]+$' | sort -nr | head -1)
           next_commit_count=$((previous_commit_count+1))
