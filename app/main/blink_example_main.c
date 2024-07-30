@@ -1,6 +1,6 @@
 /* Blink test test Example
 
-   This example  test   code is in the Public Domain (or CC0 licensed, at your option.)
+   This example  test   ffgf coden    testdd is in the Public Domain (or CC0 licensed, at your option.)
 
    Unless required by applicable law or agreed to in writing, this
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -16,7 +16,7 @@
 
 static const char *TAG = "example";
 
-/* Use project configuration menu (idf.py menuconfig) to choose the GPIO to blink,
+/* Use project configuration m  Senu (idf.py menuconfig) to choose the GPIO to blink,
    or you can edit the following line and set a number here.
 */
 #define BLINK_GPIO CONFIG_BLINK_GPIO
