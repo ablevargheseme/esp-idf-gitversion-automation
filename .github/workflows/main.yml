@@ -1,0 +1,37 @@
+name: Build ESP-IDF Project
+
+on:
+  push:
+    tags: [v*]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build ESP-IDF Project
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/project \
+            -w /project \
+            -e HOME=/tmp \
+            -e BINARY_VERSION=${{ github.ref_name }} \
+            espressif/idf:latest \
+            /bin/bash -c "idf.py build"
+
+      - name: Set permissions for build output
+        run: sudo chown -R $USER:$USER build/
+
+      - name: Create action_build directory
+        run: mkdir -p action_build
+
+      - name: Move and rename binary
+        run: mv build/blink.bin action_build/${{ github.ref_name }}.bin
+
+      - name: Upload artifact with dynamic name
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.ref_name }}
+          path: action_build/${{ github.ref_name }}.bin
