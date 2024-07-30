@@ -29,26 +29,23 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions"
 
-      - name: Fetch all history for all tags and branches
+      - name: Ensure all history is available
         run: |
-          git fetch --unshallow
-          if git show-ref --verify --quiet refs/remotes/origin/develop; then
-            git checkout develop || git checkout --track origin/develop
+          if [ -f "$(git rev-parse --git-dir)/shallow" ]; then
+            git fetch --unshallow
           fi
-          if git show-ref --verify --quiet refs/remotes/origin/main; then
-            git checkout main || git checkout --track origin/main
-          fi
+          git fetch --all
 
       - name: Determine semantic version
         id: semantic_version
         uses: paulhatch/semantic-version@v5.4.0
         with:
-          tag_prefix: "vi"
+          tag_prefix: "v"
           major_pattern: "(MAJOR)"
           major_regexp_flags: ""
           minor_pattern: "(MINOR)"
           minor_regexp_flags: ""
-          version_format: "${major}.${minor}.${patch}-prerelease${increment}}"
+          version_format: "${major}.${minor}.${patch}-prerelease${increment}"
           change_path: "src/my-service"
           namespace: "my-service"
           bump_each_commit: false
