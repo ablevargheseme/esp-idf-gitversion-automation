@@ -47,7 +47,7 @@ jobs:
           fi
           git checkout ${DIFF_DEST}
 
-      - name: Calculate changed files
+      - name: Calculate changed  files
         id: calculate_changed_files
         run: |
           if [ "${GITHUB_EVENT_NAME}" = 'push' ]; then
