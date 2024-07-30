@@ -101,9 +101,12 @@ jobs:
 
       - name: Tag build
         if: ${{ github.event_name == 'push' && (startsWith(steps.calculate_changed_files.outputs.diff_dest, 'release') || startsWith(steps.calculate_changed_files.outputs.diff_dest, 'hotfix') || contains(env.MAIN_BRANCHES, steps.calculate_changed_files.outputs.diff_dest)) }}
+        env:
+          ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions"
+          git remote set-url origin https://x-access-token:${ACTIONS_PAT}@github.com/${GITHUB_REPOSITORY}.git
           app_version=${{ steps.calculate_app_version.outputs.app_version }}
           previous_commit_count=$(git tag -l | grep "^app/v$(echo "${gitversion_calc}" | jq -r ".MajorMinorPatch")-$(echo "${gitversion_calc}" | jq -r ".PreReleaseLabel")" | grep -o -E '\.[0-9]+$' | grep -o -E '[0-9]+$' | sort -nr | head -1)
           next_commit_count=$((previous_commit_count+1))
