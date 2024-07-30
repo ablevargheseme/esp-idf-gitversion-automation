@@ -29,7 +29,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Fetch all history for all tags and branches
-        run: git fetch --unshallow && git checkout --track origin/develop && git checkout --track origin/main
+        run: |
+          git fetch --unshallow
+          if git show-ref --verify --quiet refs/remotes/origin/develop; then
+            git branch -D develop || true
+            git checkout --track origin/develop
+          fi
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            git branch -D main || true
+            git checkout --track origin/main
+          fi
 
       - name: Checkout to branch
         run: |
