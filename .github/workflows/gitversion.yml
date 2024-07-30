@@ -1,28 +1,63 @@
-# .github/workflows/version.yml
-name: Git Version
+name: CI/CD Workflow
 
 on:
+  pull_request:
+    branches:
+      - develop
+      - main
   push:
     branches:
-      - feature/codacy
+      - develop
+      - main
+      - "release/**"
+      - "hotfix/**"
+      - "feature/**"
 
 jobs:
-  lint:
+  semantic_version:
+    name: Semantic Versioning
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
-          ref: ${{ github.head_ref }} # checkout the correct branch name
-          fetch-depth: 0 # fetch the whole repo history
+          fetch-depth: 0
 
-      - name: Git Version
-        id: version
-        uses: codacy/git-version@2.7.1
+      - name: Setup Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions"
 
-      - name: Use the version
+      - name: Fetch all history for all tags and branches
         run: |
-          echo ${{ steps.version.outputs.version }}
-      - name: Use the previous version
-        run: |
-          echo ${{ steps.version.outputs.previous-version }}
+          git fetch --unshallow
+          if git show-ref --verify --quiet refs/remotes/origin/develop; then
+            git checkout develop || git checkout --track origin/develop
+          fi
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            git checkout main || git checkout --track origin/main
+          fi
+
+      - name: Determine semantic version
+        id: semantic_version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "vi"
+          major_pattern: "(MAJOR)"
+          major_regexp_flags: ""
+          minor_pattern: "(MINOR)"
+          minor_regexp_flags: ""
+          version_format: "${major}.${minor}.${patch}-prerelease${increment}}"
+          change_path: "src/my-service"
+          namespace: "my-service"
+          bump_each_commit: false
+          bump_each_commit_patch_pattern: ""
+          search_commit_body: false
+          user_format_type: "csv"
+          enable_prerelease_mode: true
+          debug: false
+          version_from_branch: false
+
+      - name: Display version
+        run: echo "New version is ${{ steps.semantic_version.outputs.version }}"
