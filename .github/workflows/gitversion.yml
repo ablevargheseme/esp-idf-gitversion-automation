@@ -32,12 +32,10 @@ jobs:
         run: |
           git fetch --unshallow
           if git show-ref --verify --quiet refs/remotes/origin/develop; then
-            git branch -D develop || true
-            git checkout --track origin/develop
+            git checkout develop || git checkout --track origin/develop
           fi
           if git show-ref --verify --quiet refs/remotes/origin/main; then
-            git branch -D main || true
-            git checkout --track origin/main
+            git checkout main || git checkout --track origin/main
           fi
 
       - name: Checkout to branch
