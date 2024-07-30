@@ -48,7 +48,7 @@ jobs:
           version_format: "${major}.${minor}.${patch}-prerelease${increment}"
           change_path: "src/my-service"
           namespace: "my-service"
-          bump_each_commit: false
+          bump_each_commit: true
           bump_each_commit_patch_pattern: ""
           search_commit_body: false
           user_format_type: "csv"
